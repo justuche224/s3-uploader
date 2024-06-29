@@ -42,6 +42,12 @@ app.post("/generate-presigned-url", async (req, res) => {
 // Endpoint to download file and upload to S3
 app.post("/upload-from-url", async (req, res) => {
   const { fileUrl, folder } = req.body;
+  if (!fileUrl || !folder) {
+    return res.status(400).send({ error: "fileUrl and folder are required" });
+  }
+
+  console.log(`Attempting to download file from URL: ${fileUrl}`);
+
   try {
     const response = await axios.get(fileUrl, { responseType: "stream" });
 
@@ -56,8 +62,8 @@ app.post("/upload-from-url", async (req, res) => {
     res.status(200).send({ uploadResult });
     console.log("uploadResult", uploadResult);
   } catch (err) {
-    console.error(err);
-    res.status(500).send(err);
+    console.error(`Error downloading or uploading file: ${err.message}`);
+    res.status(500).send({ error: err.message });
   }
 });
 
